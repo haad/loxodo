@@ -14,7 +14,9 @@ from flask import Flask, session, redirect, url_for, escape, request, render_tem
 from ...db.vault import Vault
 from ...config import config
 
-DB_PATH="tmp/test-v41.db"
+WEB_HOST='0.0.0.0'
+
+DB_PATH="/srv/chillisys-pass/chilli-vault.db"
 DB_FORMAT="v4"
 
 class Webloxodo:
@@ -65,7 +67,7 @@ def mod():
   if request.method == 'POST':
     entry_id = request.form['mod_radio']
     vault_records = webloxo.vault.records[:]
-    
+
     for record in vault_records:
       if get_html_id(record.last_mod) == entry_id:
         return redirect(url_for('mod_entry', id=entry_id))
@@ -75,7 +77,7 @@ def mod():
 def mod_entry(id=None):
   if id == None:
     return redirect(url_for('mod'))
-  
+
   if ('logged_in' in session) and (webloxo.vault) and (request.method == 'GET'):
     vault_records = webloxo.vault.records[:]
     for record in vault_records:
@@ -158,4 +160,4 @@ if __name__ == "Loxodo.frontends.web.loxodo":
     app.jinja_env.filters['get_html_id'] = get_html_id
 
     app.debug = False
-    app.run()
+    app.run(host=WEB_HOST)
