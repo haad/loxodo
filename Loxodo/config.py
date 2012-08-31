@@ -37,6 +37,7 @@ class Config(object):
         self.search_notes = False
         self.search_passwd = False
         self.alphabet = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+        self.web_host = "0.0.0.0"
 
         self._fname = self.get_config_filename()
         self._parser = SafeConfigParser()

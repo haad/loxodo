@@ -160,4 +160,4 @@ if __name__ == "Loxodo.frontends.web.loxodo":
     app.jinja_env.filters['get_html_id'] = get_html_id
 
     app.debug = False
-    app.run(host=WEB_HOST)
+    app.run(host=config.web_host)
