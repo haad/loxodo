@@ -8,16 +8,17 @@ import re
 import time
 import hashlib
 import base64
+import errno
+from socket import error as socket_error
 
-import json
 from pprint import pprint
 from os import getcwd
 
 from flask import Flask, session, redirect, url_for, escape, request, render_template
-from flask.ext.mail import Mail
+from flask.ext.mail import Mail, Message
 
 from ...db.vault import Vault
-from ...config import config
+from ...config import config, RECIPIENTS, DEFAULT_MAIL_SENDER, MAIL_SERVER, MAIL_PORT
 
 class Webloxodo(Flask):
   """
@@ -49,6 +50,15 @@ class Webloxodo(Flask):
   # Application debug switch
   def app_debug(self):
       return config.debug
+
+  # Sent email to recipients with simple message when user was added to DB
+  def send_add_email(self, to, user, url):
+    msg = Message("Password added to WebLoxodo Password Manager", sender = DEFAULT_MAIL_SENDER, recipients = to)
+    msg.body = "User="+user+" with  Url="+url+" was added to WebLoxodo Password managers"
+    try:
+      self.mail.send(msg)
+    except socket_error as serr:
+      print "Sent email failed"+str(serr.errno)
 
 def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     str_time = time.gmtime(value)
@@ -87,6 +97,7 @@ def add():
     webloxo.vault.records.append(entry)
     # Save changes to vault
     webloxo.vault.write_to_file(webloxo.vault_file, webloxo.password)
+    webloxo.send_add_email(RECIPIENTS, entry.user, entry.url)
   return redirect(url_for('index'))
 
 @webloxo.app.route('/mod', methods=['GET', 'POST'])

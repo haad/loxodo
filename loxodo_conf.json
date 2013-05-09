@@ -1,7 +1,0 @@
-{
-  "debug": "false",
-  "encrypt_html_passwords_with_user_password": "false",
-  "db_format": "v4",
-  "db_path": "/srv/chillisys-pass/chilli-vault.db",
-  "web_host": "0.0.0.0"
-}

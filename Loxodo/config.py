@@ -28,6 +28,7 @@ MAIL_USE_SSL = False
 MAIL_USERNAME = None
 MAIL_PASSWORD = None
 DEFAULT_MAIL_SENDER = "webloxodo@chillisys.com"
+RECIPIENTS = "adam.hamsik@chillisys.com"
 
 class Config(object):
     """
