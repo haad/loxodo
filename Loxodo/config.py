@@ -21,6 +21,13 @@ import os
 import platform
 from ConfigParser import SafeConfigParser
 
+MAIL_SERVER = 'localhost'
+MAIL_PORT = 25
+MAIL_USE_TLS = False
+MAIL_USE_SSL = False
+MAIL_USERNAME = None
+MAIL_PASSWORD = None
+DEFAULT_MAIL_SENDER = "webloxodo@chillisys.com"
 
 class Config(object):
     """
@@ -37,7 +44,14 @@ class Config(object):
         self.search_notes = False
         self.search_passwd = False
         self.alphabet = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+
         self.web_host = "0.0.0.0"
+
+        self.db_path = "/srv/chillisys-pass/chilli-vault.db"
+        self.db_format = "v4"
+
+        self.debug = False
+        self.encrypt_html_passwords_with_user_password = False
 
         self._fname = self.get_config_filename()
         self._parser = SafeConfigParser()
@@ -108,25 +122,6 @@ class Config(object):
         Returns the full filename of the config file
         """
         base_fname = "loxodo"
-
-        # On Mac OS X, config files go to ~/Library/Application Support/foo/
-        if platform.system() == "Darwin":
-            base_path = os.path.join(os.path.expanduser("~"), "Library", "Application Support")
-            if os.path.isdir(base_path):
-                return os.path.join(base_path, base_fname, base_fname + ".ini")
-
-        # On Microsoft Windows, config files go to $APPDATA/foo/
-        if platform.system() in ("Windows", "Microsoft"):
-            if ("APPDATA" in os.environ):
-                base_path = os.environ["APPDATA"]
-                if os.path.isdir(base_path):
-                    return os.path.join(base_path, base_fname, base_fname + ".ini")
-
-        # Allow config directory override as per freedesktop.org XDG Base Directory Specification
-        if ("XDG_CONFIG_HOME" in os.environ):
-            base_path = os.environ["XDG_CONFIG_HOME"]
-            if os.path.isdir(base_path):
-                return os.path.join(base_path, base_fname, base_fname + ".ini")
 
         # Default configuration path is ~/.config/foo/
         base_path = os.path.join(os.path.expanduser("~"), ".config")

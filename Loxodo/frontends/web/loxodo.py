@@ -26,7 +26,6 @@ class Webloxodo(Flask):
   def __init__(self, name):
     self.app = Flask(__name__)
     self.mail = Mail(self.app)
-    self.webconfig = self.load_config('loxodo_conf.json')
     self.vault_file=self.db_path()
     self.vault_format=self.db_format()
     self.vault = None
@@ -35,30 +34,29 @@ class Webloxodo(Flask):
     self.app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
     self.app.debug = self.app_debug()
 
-  def load_config(self, conf_file):
-    json_data=open(conf_file)
-    data = json.load(json_data)
-    json_data.close()
-    return data
-
   # Get IP address on which Loxodo app should be running
   def web_host(self):
-    return self.webconfig['web_host'].encode('utf8', 'replace')
+    return config.web_host
 
   # DB vault Path
   def db_path(self):
-    return self.webconfig['db_path'].encode('utf8', 'replace')
+    return config.db_path
 
   # DB format string
   def db_format(self):
-    return self.webconfig['db_format'].encode('utf8', 'replace')
+    return config.db_format
 
   # Application debug switch
   def app_debug(self):
-    if self.webconfig["debug"] == 'true':
-      return True
-    else:
-      return False
+      return config.debug
+
+def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
+    str_time = time.gmtime(value)
+    return time.strftime(format, str_time)
+
+def get_html_id(record_id):
+    # Base64 encode sha256 hash from entry passed to this routine use only 10 chars from it that should be enough.
+    return base64.b64encode(hashlib.sha256(str(record_id).encode('utf-8','replace')).digest())[3:13]
 
 webloxo = Webloxodo(__name__)
 
@@ -168,7 +166,7 @@ def login():
         if webloxo.vault != None:
           session['logged_in'] = request.form['password']
         return redirect(url_for('index'))
-    return render_template('open.html', vault_p=webloxo.db_path(), name=None)
+    return render_template('open.html', vault_p=webloxo.db_path())
 
 @webloxo.app.route('/logout')
 def logout():
@@ -183,14 +181,6 @@ def internal_error(error):
 @webloxo.app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'), 500
-
-def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
-    str_time = time.gmtime(value)
-    return time.strftime(format, str_time)
-
-def get_html_id(record_id):
-    # Base64 encode sha256 hash from entry passed to this routine use only 10 chars from it that should be enough.
-    return base64.b64encode(hashlib.sha256(str(record_id).encode('utf-8','replace')).digest())[3:13]
 
 if __name__ == "Loxodo.frontends.web.loxodo":
     webloxo.app.jinja_env.filters['datetimeformat'] = datetimeformat

@@ -254,8 +254,8 @@ Dependiences
 
 Flask-Bcrypt
 Flask-Bootstrap
-Flask-DebugToolbar
-Flask-Mail
-Flask-Lesscss
+Flask-DebugToolbar ??
+Flask-Mail !
+Flask-Lesscss !
 
 
