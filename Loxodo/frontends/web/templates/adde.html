@@ -1,29 +1,6 @@
-<!doctype html>
-<head>
-  <title>Add new entries to opened vault</title>
-  <link href="static/stylesheets/style.css" media="screen" rel="stylesheet"      type="text/css" />
-</head>
+{% extends "layout.html" %}
 
-<body>
-  <div id="header_wrapper">
-    <div id="header">
-      <div id="site_title">
-        <h1><a href="index.html">Loxodo <em><span class="hidden">- </span>A Password Safe V3 compatible Password Vault</em></a></h1>
-      </div>
-    </div>
-  </div>
-
-  <div class="tabbed_area">
-    <ul class="tabs">
-      <li><a href="/" title="content_1" class="tab">Home</a></li>
-      <li><a href="/list" title="content_2" class="tab">List Entries</a></li>
-      <li><a href="/mod" title="content_3" class="tab">Mod Entry</a></li>
-      <li><a href="/add" title="content_4" class="tab active">Add Entry</a></li>
-      <li><a href="/logout" title="content_5" class="tab">Logout</a></li>
-    </ul>
-  </div>
-
-  <div id="main_wrapper">
+{% block content %}
     <form action="" method="post">
       <table>
         <tr>
@@ -53,6 +30,5 @@
       </table>
       <p><input type=submit value="Add entry"></p>
     </form>
-  </div>
-</body>
+{% endblock %}
 

@@ -140,6 +140,7 @@ TODO
 Pythonbrew setup
 ~~~~~~~~~~~~~~~~
 
+```
 [haad@cid chillisys-pass]$ pythonbrew install --force 2.7.2
 Use the previously fetched /Users/haad/.pythonbrew/dists/Python-2.7.2.tgz
 Extracting Python-2.7.2.tgz into /Users/haad/.pythonbrew/build/Python-2.7.2
@@ -245,4 +246,16 @@ Installing collected packages: flask, Werkzeug, Jinja2
     warning: no previously-included files matching '*.pyo' found under directory 'docs'
 Successfully installed flask Werkzeug Jinja2
 Cleaning up...
+```
+
+
+Dependiences
+------------
+
+Flask-Bcrypt
+Flask-Bootstrap
+Flask-DebugToolbar
+Flask-Mail
+Flask-Lesscss
+
 

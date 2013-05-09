@@ -1,7 +1,6 @@
-<!doctype html>
-<head>
-  <title>Vault login site</title>
-  <script src="static/js/jquery-2.0.0-min.js"></script>
+{% extends "layout.html" %}
+
+{% block javascript %}
   <script type="text/javascript">
   $(document).ready(function() {
     $('a.login-window').click(function() {
@@ -37,19 +36,9 @@
   });
 });
   </script>
+{% endblock %}
 
-  <link href="static/stylesheets/style.css" media="screen" rel="stylesheet"      type="text/css" />
-</head>
-
-<body>
-  <div id="header_wrapper">
-    <div id="header">
-      <div id="site_title">
-        <h1>Vault login site</h1>
-      </div>
-    </div>
-  </div>
-
+{% block content %}
   <div class="container">
     <div id="content">
 
@@ -83,4 +72,5 @@
 
     </div>
   </div>
-</body>
+{% endblock %}
+

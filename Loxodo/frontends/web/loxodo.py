@@ -9,28 +9,51 @@ import time
 import hashlib
 import base64
 
+import json
+from pprint import pprint
+from os import getcwd
+
 from flask import Flask, session, redirect, url_for, escape, request, render_template
 
 from ...db.vault import Vault
 from ...config import config
 
-WEB_HOST='0.0.0.0'
-
-DB_PATH="/srv/chillisys-pass/chilli-vault.db"
-DB_FORMAT="v4"
-
-class Webloxodo:
-  def __init__(self):
+class Webloxodo(Flask):
+  """
+  Manages Loxodo configuration from loxodo_conf.json file.
+  """
+  def __init__(self, name):
+    self.app = Flask(__name__)
+    self.webconfig = self.load_config('loxodo_conf.json')
+    self.vault_file=self.db_path()
+    self.vault_format=self.db_format()
     self.vault = None
-    self.vault_file=DB_PATH
-    self.vault_format=DB_FORMAT
     self.password = None
 
-app = Flask(__name__)
+  def load_config(self, conf_file):
+    json_data=open(conf_file)
+    data = json.load(json_data)
+    json_data.close()
+    return data
 
-webloxo = Webloxodo()
+  def web_host(self):
+    return self.webconfig['web_host'].encode('utf8', 'replace')
 
-@app.route('/')
+  def db_path(self):
+    return self.webconfig['db_path'].encode('utf8', 'replace')
+
+  def db_format(self):
+    return self.webconfig['db_format'].encode('utf8', 'replace')
+
+  def app_debug(self):
+    if self.webconfig["debug"] == 'true':
+      return True
+    else:
+      return False
+
+webloxo = Webloxodo(__name__)
+
+@webloxo.app.route('/')
 def index():
     if 'logged_in' in session:
         name = escape(session['logged_in'])
@@ -38,7 +61,7 @@ def index():
         name = None
     return render_template('index.html', name=name)
 
-@app.route('/add', methods=['GET', 'POST'])
+@webloxo.app.route('/add', methods=['GET', 'POST'])
 def add():
   # It might be a good idea to encode passwords in base64 so we do not have
   # them in plaintext in html and use javascript to decode them.
@@ -59,7 +82,7 @@ def add():
     webloxo.vault.write_to_file(webloxo.vault_file, webloxo.password)
   return redirect(url_for('index'))
 
-@app.route('/mod', methods=['GET', 'POST'])
+@webloxo.app.route('/mod', methods=['GET', 'POST'])
 def mod():
   if ('logged_in' in session) and (webloxo.vault) and (request.method == 'GET'):
     vault_records = webloxo.vault.records[:]
@@ -73,7 +96,7 @@ def mod():
         return redirect(url_for('mod_entry', id=entry_id))
     return render_template('mod_list.html', vault_records=vault_records)
 
-@app.route('/mod_entry/<id>', methods=['GET', 'POST'])
+@webloxo.app.route('/mod_entry/<id>', methods=['GET', 'POST'])
 def mod_entry(id=None):
   if id == None:
     return redirect(url_for('mod'))
@@ -99,7 +122,7 @@ def mod_entry(id=None):
         webloxo.vault.write_to_file(webloxo.vault_file, webloxo.password)
     return redirect(url_for('mod'))
 
-@app.route('/list')
+@webloxo.app.route('/list')
 def list():
   # It might be a good idea to encode passwords in base64 so we do not have
   # them in plaintext in html and use javascript to decode them.
@@ -107,7 +130,7 @@ def list():
     vault_records = webloxo.vault.records[:]
     return render_template('liste.html', vault_records=vault_records)
 
-@app.route('/login', methods=['GET', 'POST'])
+@webloxo.app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'logged_in' in session:
       return redirect(url_for('index'))
@@ -136,16 +159,16 @@ def login():
         if webloxo.vault != None:
           session['logged_in'] = request.form['password']
         return redirect(url_for('index'))
-    return render_template('open.html', vault_p=DB_PATH)
+    return render_template('open.html', vault_p=webloxo.db_path(), name=None)
 
-@app.route('/logout')
+@webloxo.app.route('/logout')
 def logout():
     # remove the username from the session if its there
     session.pop('logged_in', None)
     return redirect(url_for('index'))
 
 # set the secret key.  keep this really secret:
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+webloxo.app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     str_time = time.gmtime(value)
@@ -156,8 +179,8 @@ def get_html_id(record_id):
     return base64.b64encode(hashlib.sha256(str(record_id).encode('utf-8','replace')).digest())[3:13]
 
 if __name__ == "Loxodo.frontends.web.loxodo":
-    app.jinja_env.filters['datetimeformat'] = datetimeformat
-    app.jinja_env.filters['get_html_id'] = get_html_id
+    webloxo.app.jinja_env.filters['datetimeformat'] = datetimeformat
+    webloxo.app.jinja_env.filters['get_html_id'] = get_html_id
 
-    app.debug = False
-    app.run(host=config.web_host)
+    webloxo.app.debug = webloxo.app_debug()
+    webloxo.app.run(host=webloxo.web_host())
