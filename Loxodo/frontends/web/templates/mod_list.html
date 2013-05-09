@@ -19,7 +19,9 @@ $(window).load(function(){
   {% block content %}
   <form action="" method="post">
     <div>
-      <input type="text" id="search" placeholder="Type to search">
+      <form class="form-search">
+        <input type="text" id="search" placeholder="Type to search" class="form-search">
+      </form>
 
       <table border="1"  cellspacing="1">
         <thead id="password_head">
@@ -47,8 +49,8 @@ $(window).load(function(){
           {% endfor %}
         </tbody>
       </table>
-      <div>
-        <p><input type=submit value="Modify" method="post"/></p>
+      <div id="submit_button">
+        <input type=submit value="Modify" method="post" class="btn"/>
       </div>
     </div>
   </form>
