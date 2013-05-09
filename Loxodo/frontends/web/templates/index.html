@@ -1,7 +1,22 @@
 <!doctype html>
 <head>
 <title>Loxodo Password Vault web interface</title>
-<link href="static/stylesheets/style.css" media="screen" rel="stylesheet"      type="text/css" />
+<link href="static/stylesheets/style.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="static/js/jquery-2.0.0-min.js"></script>
+   <script>
+      $(document).ready(function() {
+        $("#tabbed_area").tabs();
+      });
+
+      $('#tabbed_area').tabs({
+        load: function(event, ui) {
+            $(ui.panel).delegate('a', 'click', function(event) {
+                $(ui.panel).load(this.href);
+                event.preventDefault();
+            });
+        }
+      });
+ </script>
 </head>
 
 <body>
@@ -12,16 +27,19 @@
     </div>
   </div>
 </div>
-<div id="main_wrapper">
+
+<div class="tabbed_box">
 {% if name %}
-  <h1>You are logged in!</h1>
-  <p> Opened vault info: </p>
-  <ul>
-    <li>Get list of vault entries <a href="/list">list</a></li>
-    <li>Add new entry to vault <a href="/add">add</a></li>
-    <li>Modify existing entry in vault <a href="/mod">mod</a></li>
-    <li>Logout from web loxodo <a href="/logout">logout</a></li>
-  </ul>
+  <div class="tabbed_area">
+    <ul class="tabs">
+        <li><a href="/" title="content_1" class="tab active">Home</a></li>
+        <li><a href="/list" title="content_2" class="tab">List Entries</a></li>
+        <li><a href="/mod" title="content_3" class="tab">Mod Entry</a></li>
+        <li><a href="/add" title="content_4" class="tab">Add Entry</a></li>
+        <li><a href="/logout" title="content_5" class="tab">Logout</a></li>
+    </ul>
+</div>
+    <h4><small>You are logged in!</small></h4>
 {% else %}
   <h1>You are not logged in please go to <a href="/login">/login site</a> to log in.</h1>
 {% endif %}
