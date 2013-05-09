@@ -14,6 +14,7 @@ from pprint import pprint
 from os import getcwd
 
 from flask import Flask, session, redirect, url_for, escape, request, render_template
+from flask.ext.mail import Mail
 
 from ...db.vault import Vault
 from ...config import config
@@ -24,11 +25,15 @@ class Webloxodo(Flask):
   """
   def __init__(self, name):
     self.app = Flask(__name__)
+    self.mail = Mail(self.app)
     self.webconfig = self.load_config('loxodo_conf.json')
     self.vault_file=self.db_path()
     self.vault_format=self.db_format()
     self.vault = None
     self.password = None
+    # set the secret key.  keep this really secret:
+    self.app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+    self.app.debug = self.app_debug()
 
   def load_config(self, conf_file):
     json_data=open(conf_file)
@@ -36,15 +41,19 @@ class Webloxodo(Flask):
     json_data.close()
     return data
 
+  # Get IP address on which Loxodo app should be running
   def web_host(self):
     return self.webconfig['web_host'].encode('utf8', 'replace')
 
+  # DB vault Path
   def db_path(self):
     return self.webconfig['db_path'].encode('utf8', 'replace')
 
+  # DB format string
   def db_format(self):
     return self.webconfig['db_format'].encode('utf8', 'replace')
 
+  # Application debug switch
   def app_debug(self):
     if self.webconfig["debug"] == 'true':
       return True
@@ -167,8 +176,13 @@ def logout():
     session.pop('logged_in', None)
     return redirect(url_for('index'))
 
-# set the secret key.  keep this really secret:
-webloxo.app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+@webloxo.app.errorhandler(404)
+def internal_error(error):
+    return render_template('404.html'), 404
+
+@webloxo.app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
 
 def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     str_time = time.gmtime(value)
@@ -182,5 +196,14 @@ if __name__ == "Loxodo.frontends.web.loxodo":
     webloxo.app.jinja_env.filters['datetimeformat'] = datetimeformat
     webloxo.app.jinja_env.filters['get_html_id'] = get_html_id
 
-    webloxo.app.debug = webloxo.app_debug()
+    if not webloxo.app.debug:
+      import logging
+      from logging.handlers import RotatingFileHandler
+      file_handler = RotatingFileHandler('/tmp/webloxo.log', 'a', 1 * 1024 * 1024, 10)
+      file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+      webloxo.app.logger.setLevel(logging.INFO)
+      file_handler.setLevel(logging.INFO)
+      webloxo.app.logger.addHandler(file_handler)
+      webloxo.app.logger.info('Web Loxodo startup')
+
     webloxo.app.run(host=webloxo.web_host())
