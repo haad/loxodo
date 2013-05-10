@@ -26,10 +26,14 @@ function showElementByVisible(obj) {
 </script>
 {% endblock %}
 
-{% block content %}
-<form class="form-search">
-    <input type="text" id="search" placeholder="Type to search" class="form-search">
+{% block search %}
+<form class="navbar-search pull-right">
+    <input type="text" class="search-query pull-right form-search"  id="search"  placeholder="Search">
 </form>
+{% endblock %}
+
+{% block content %}
+
 <table border="1"  cellspacing="1" class="table table-bordered table-condensed">
    <thead>
       <tr id="password_head">

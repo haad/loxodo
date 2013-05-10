@@ -16,13 +16,15 @@ $(window).load(function(){
 </script>
 {% endblock %}
 
+{% block search %}
+<form class="navbar-search pull-right">
+    <input type="text" class="search-query pull-right form-search"  id="search"  placeholder="Search">
+</form>
+{% endblock %}
+
   {% block content %}
   <form action="" method="post">
     <div>
-      <form class="form-search">
-        <input type="text" id="search" placeholder="Type to search" class="form-search">
-      </form>
-
       <table border="1"  cellspacing="1" class="table table-bordered table-condensed">
         <thead id="password_head">
           <tr>

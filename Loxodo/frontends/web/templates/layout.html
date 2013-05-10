@@ -27,19 +27,32 @@
     </div>
   </div>
 
-  <div class="tabbed_area">
-    <ul class="tabs">
-        <li><a href="/" title="content_1" class="tab active">Home</a></li>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <a class="brand" href="#">WebLoxodo</a>
+      <ul class="nav">
+        <li><a href="/" title="content_1" class="active">Home</a></li>
         <li><a href="/list" title="content_2" class="tab">List Entries</a></li>
         <li><a href="/mod" title="content_3" class="tab">Mod Entry</a></li>
         <li><a href="/add" title="content_4" class="tab">Add Entry</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin</a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+            <li><a tabindex="-1" href="#">Create New User</a></li>
+          </ul>
+        </li>
         {% if session.logged_in %}
-          <li><a href="/logout" title="content_5" class="tab">Logout</a></li>
+        <li><a href="/logout" title="content_5" class="tab">Logout</a></li>
         {% else %}
-          <li><a href="/login" title="content_5" class="tab">Login</a></li>
+        <li><a href="/login" title="content_5" class="tab">Login</a></li>
         {% endif %}
-    </ul>
+      </ul>
+      {% block search %}
+
+      {% endblock %}
+    </div>
   </div>
+</div>
 
  <div id="main_wrapper">
   {% block content %}
