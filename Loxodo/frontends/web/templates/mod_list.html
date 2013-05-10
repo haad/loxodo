@@ -51,8 +51,9 @@ $(window).load(function(){
           {% endfor %}
         </tbody>
       </table>
-      <div id="submit_button">
-        <input type=submit value="Modify" method="post" class="btn btn-primary"/>
+      <div class="btn-group">
+        <input type="submit" value="Modify" method="post" class="btn btn-primary" name="button"/>
+        <input type="submit" value="Delete Entry" method="post" class="btn btn-primary" name="button"/>
       </div>
     </div>
   </form>

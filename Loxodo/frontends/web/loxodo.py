@@ -66,7 +66,20 @@ def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
 
 def get_html_id(record_id):
     # Base64 encode sha256 hash from entry passed to this routine use only 10 chars from it that should be enough.
-    return base64.b64encode(hashlib.sha256(str(record_id).encode('utf-8','replace')).digest())[3:13]
+    return base64.b64encode(hashlib.sha256(str(record_id).encode('utf-8','replace')).hexdigest())[4:20]
+
+def del_entry(id=None):
+  if id == None:
+    return redirect(url_for('mod'))
+
+  vault_records = webloxo.vault.records[:]
+  for record in vault_records:
+    if get_html_id(record.last_mod) == id:
+      vault_records.remove(record)
+
+  webloxo.vault.records=vault_records
+  webloxo.vault.write_to_file(webloxo.vault_file, webloxo.password)
+  return redirect(url_for('mod'))
 
 webloxo = Webloxodo(__name__)
 
@@ -109,9 +122,15 @@ def mod():
     entry_id = request.form['mod_radio']
     vault_records = webloxo.vault.records[:]
 
+    pprint(request.form)
     for record in vault_records:
       if get_html_id(record.last_mod) == entry_id:
-        return redirect(url_for('mod_entry', id=entry_id))
+          if request.form['button'] == "Modify":
+            return redirect(url_for('mod_entry', id=entry_id))
+          else:
+            del_entry(id=entry_id)
+            vault_records = webloxo.vault.records[:]
+
     return render_template('mod_list.html', vault_records=vault_records)
 
 @webloxo.app.route('/mod_entry/<id>', methods=['GET', 'POST'])
@@ -183,7 +202,7 @@ def login():
 def logout():
     # remove the username from the session if its there
     session.pop('logged_in', None)
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @webloxo.app.errorhandler(404)
 def internal_error(error):
