@@ -252,9 +252,8 @@ Cleaning up...
 Dependiences
 ------------
 
-Flask-Bcrypt
-Flask-Bootstrap
-Flask-DebugToolbar ??
+Flask-Bcrypt !
+Flask-Bootstrap !
 Flask-Mail !
 Flask-Lesscss !
 
