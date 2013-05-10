@@ -28,6 +28,8 @@
               <td><input type=text name=url value="{{record.url.encode('utf-8', 'replace')}}"></td>
               </tr>
           </table>
-          <p><input type=submit value="Modify entry"></p>
+          <div id="submit_button">
+            <input type="submit" value="Modify entry" class="btn btn-primary">
+          </div>
       </form>
 {% endblock %}

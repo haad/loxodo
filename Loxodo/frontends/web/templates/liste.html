@@ -57,7 +57,7 @@ function showElementByVisible(obj) {
     <td>{{record.notes.encode('utf-8', 'replace')}}</td>
     <td>{{record.url.encode('utf-8', 'replace')}}</td>
     <td>{{record.last_mod|datetimeformat}}</td>
-    <td><input id="show_hide_pwd_bt_{{record.last_mod|get_html_id}}" type="button" value="Show Password" onClick="showElementByVisible('{{record.last_mod|get_html_id}}');" /></td>
+    <td><input class="btn" id="show_hide_pwd_bt_{{record.last_mod|get_html_id}}" type="button" value="Show Password" onClick="showElementByVisible('{{record.last_mod|get_html_id}}');" /></td>
   </tr>
   {% endfor %}
 <tr>

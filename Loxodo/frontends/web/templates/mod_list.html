@@ -46,7 +46,7 @@ $(window).load(function(){
             <td>{{record.notes.encode('utf-8', 'replace')}}</td>
             <td>{{record.url.encode('utf-8', 'replace')}}</td>
             <td>{{record.last_mod|datetimeformat}}</td>
-            <td><input name="mod_radio" type="radio" value="{{record.last_mod|get_html_id}}" /></td>
+            <td><input class="radio" name="mod_radio" type="radio" value="{{record.last_mod|get_html_id}}" /></td>
           </tr>
           {% endfor %}
         </tbody>
