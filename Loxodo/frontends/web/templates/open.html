@@ -49,23 +49,23 @@
       </div>
 
       <div id="login-box" class="login-popup">
-        <a href="/login" class="close"><img src="static/images/close_pop.png" class="btn_close" title="Close Window" alt="Close" /></a>
+        <a href="/login" class="close"><img src="/static/images/close_pop.png" class="btn_close" title="Close Window" alt="Close" /></a>
         <form method="post" class="signin" action="">
           <fieldset class="textbox">
             <label class="password">
               <span>Password</span>
-              <input id="password" name="password" value="" type="password" placeholder="Password">
+              <input class="input-medium" id="password" name="password" value="" type="password" placeholder="Password">
             </label>
             <label class="vault_path">
               <span>Vault Path</span>
-              <input id="vault_path" name="vault_path" value="{{vault_p}}" type="text">
+              <input class="input-medium" id="vault_path" name="vault_path" value="{{vault_p}}" type="text">
             </label>
             <label class="create_vault">
-              <span>Create Vault</span>
-              <input id="vault_create" type="checkbox" name="vault_create" value="1" >
+              <span>Create Vault
+              <input id="vault_create" class="checkbox inline" type="checkbox" name="vault_create" value="1" ></span>
             </label>
 
-            <button class="button" type="submit">Login</button>
+            <button class="btn btn-block" type="submit">Login</button>
          </fieldset>
         </form>
       </div>
