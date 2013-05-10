@@ -44,40 +44,40 @@ class Vault(object):
     http://passwordsafe.svn.sourceforge.net/viewvc/passwordsafe/trunk/pwsafe/pwsafe/docs/formatV3.txt?revision=2139
 
     Introduction of pwsafe file 4.0 version.
-    
+
     To be able to share one file with more than one user we need to change
     database look little bit. Way how we can support more users than one is
     by using secondary passwords. During creation of database we ask
-    generate master password and create db. Later we ask for secondary 
+    generate master password and create db. Later we ask for secondary
     one to encrypt master password on disk.
-    
+
     Database with one Master password:
     TAG|SALT|ITER|H(P')|B1|B2|B3|B4|IV|HDR|R1|R2|...|Rn|EOF|HMAC
-    
-    During adding secondary password to database, program will ask for 
-    secondary passwd and store them before Database tag. Program asks 
-    for secondary password with which we encrypts master one and stores it in 
+
+    During adding secondary password to database, program will ask for
+    secondary passwd and store them before Database tag. Program asks
+    for secondary password with which we encrypts master one and stores it in
     |PTAG|MASTERPASSWORD| entry.
-    
+
     PTAG can be one of PSTW or PSAE where
-    
+
     PSTW means that PASSWORD is encrypted with Twofish
     PSAE means that PASSWORD is encrypted with AES
-    
+
     Database with one secondary password:
     TAG|PTAG|MASTERPASSWORD|PTAG|MASTERPASSWORD|DTAG|SALT|ITER|H(P')|B1|B2|B3|B4|IV|HDR|R1|R2|...|Rn|EOF|HMAC
       1T         1P       2T        2P        MT
-    Each couple |PTAG|MASTERPASSWORD| is encrypted by different secondary 
-    password. During start application will ask for secondary password 
+    Each couple |PTAG|MASTERPASSWORD| is encrypted by different secondary
+    password. During start application will ask for secondary password
     and try to findout version of database.
-    
+
     First 4bytes of db are used as DTAG for old v3 db it's PWS3 for new
-    multi-password enabled db it's PWS4. Then each encryption of master 
-    password is started with PTAG [PSTW, PSAE]. Then after passwords we have 
+    multi-password enabled db it's PWS4. Then each encryption of master
+    password is started with PTAG [PSTW, PSAE]. Then after passwords we have
     DTAG which marks start of actuall database data for us.
-    
+
     PWS4|PSTW|password Twofish|PSAE|password AES|PWDB|-> DATABASE
-    
+
     """
     def __init__(self, password, filename=None, format="v3"):
         self.db_ver = None
@@ -125,7 +125,7 @@ class Vault(object):
             Return True if this Field and the given one are of the same type and both contain the same value.
             """
             return self.raw_type == field.raw_type and self.raw_value == field.raw_value
-    
+
     class Header(object):
         """
         Contains the fields of a Vault header.
@@ -135,7 +135,7 @@ class Vault(object):
 
         def add_raw_field(self, raw_field):
             self.raw_fields[raw_field.raw_type] = raw_field
-    
+
     class Record(object):
         """
         Contains the fields of an individual password record.
@@ -150,14 +150,14 @@ class Vault(object):
             self._passwd = ""
             self._last_mod = 0
             self._url = ""
-        
+
         @staticmethod
         def create():
             record = Vault.Record()
             record.uuid = uuid.uuid4()
             record.last_mod = int(time.time())
             return record
-        
+
         def add_raw_field(self, raw_field):
             self.raw_fields[raw_field.raw_type] = raw_field
             if (raw_field.raw_type == 0x01):
@@ -176,14 +176,14 @@ class Vault(object):
                 self._last_mod = struct.unpack("<L", raw_field.raw_value)[0]
             if (raw_field.raw_type == 0x0d):
                 self._url = raw_field.raw_value.decode('utf_8', 'replace')
-        
+
         def mark_modified(self):
             self.last_mod = int(time.time())
-        
+
         # TODO: refactor Record._set_xyz methods to be less repetitive
         def _get_uuid(self):
             return self._uuid
-        
+
         def _set_uuid(self, value):
             self._uuid = value
             raw_id = 0x01
@@ -192,10 +192,10 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.bytes_le
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def _get_group(self):
             return self._group
-        
+
         def _set_group(self, value):
             self._group = value
             raw_id = 0x02
@@ -204,10 +204,10 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.encode('utf_8', 'replace')
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def _get_title(self):
             return self._title
-        
+
         def _set_title(self, value):
             self._title = value
             raw_id = 0x03
@@ -216,10 +216,10 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.encode('utf_8', 'replace')
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def _get_user(self):
             return self._user
-        
+
         def _set_user(self, value):
             self._user = value
             raw_id = 0x04
@@ -228,10 +228,10 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.encode('utf_8', 'replace')
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def _get_notes(self):
             return self._notes
-        
+
         def _set_notes(self, value):
             self._notes = value
             raw_id = 0x05
@@ -240,10 +240,10 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.encode('utf_8', 'replace')
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def _get_passwd(self):
             return self._passwd
-        
+
         def _set_passwd(self, value):
             self._passwd = value
             raw_id = 0x06
@@ -252,10 +252,10 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.encode('utf_8', 'replace')
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def _get_last_mod(self):
             return self._last_mod
-        
+
         def _set_last_mod(self, value):
             assert type(value) == int
             self._last_mod = value
@@ -264,10 +264,10 @@ class Vault(object):
                 self.raw_fields[raw_id] = Vault.Field(raw_id, 0, "0")
             self.raw_fields[raw_id].raw_value = struct.pack("<L", value)
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
-        
+
         def _get_url(self):
             return self._url
-        
+
         def _set_url(self, value):
             self._url = value
             raw_id = 0x0d
@@ -276,7 +276,7 @@ class Vault(object):
             self.raw_fields[raw_id].raw_value = value.encode('utf_8', 'replace')
             self.raw_fields[raw_id].raw_len = len(self.raw_fields[raw_id].raw_value)
             self.mark_modified()
-        
+
         def is_corresponding(self, record):
             """
             Return True if Records are the same, based on either UUIDs (if available) or title
@@ -284,13 +284,13 @@ class Vault(object):
             if not self.uuid or not record.uuid:
                 return self.title == record.title
             return self.uuid == record.uuid
-        
+
         def is_newer_than(self, record):
             """
             Return True if this Record's last modifed date is later than the given one's.
             """
             return self.last_mod > record.last_mod
-        
+
         def merge(self, record):
             """
             Merge in fields from another Record, replacing existing ones
@@ -307,19 +307,19 @@ class Vault(object):
         passwd = property(_get_passwd, _set_passwd)
         last_mod = property(_get_last_mod, _set_last_mod)
         url = property(_get_url, _set_url)
-        
+
         def __cmp__(self, other):
             """
             Compare Based on Group, then by Title
             """
             return cmp(self._group+self._title, other._group+other._title)
-        
-    
+
+
     @staticmethod
     def _stretch_password(password, salt, iterations):
         """
         Generate the SHA-256 value of a password after several rounds of stretching.
-        
+
         The algorithm is described in the following paper:
         [KEYSTRETCH Section 4.1] http://www.schneier.com/paper-low-entropy.pdf
         """
@@ -330,7 +330,7 @@ class Vault(object):
         for dummy in range(iterations):
             stretched_password = hashlib.sha256(stretched_password).digest()
         return stretched_password
-    
+
     def _read_field_tlv(self, cipher):
         """
         Return one field of a vault record by reading from the given file handle.
@@ -352,7 +352,7 @@ class Vault(object):
                 raw_value += cipher.decrypt(data)
         raw_value = raw_value[:raw_len]
         return self.Field(raw_type, raw_len, raw_value)
-    
+
     def urandom(self, count):
         try:
             return os.urandom(count)
@@ -361,7 +361,7 @@ class Vault(object):
             for dummy in range(count):
                 retval += struct.pack("<B", random.randint(0, 0xFF))
             return retval
-    
+
     def _write_field_tlv(self, cipher, field):
         """
         Write one field of a vault record using the given file handle.
@@ -413,7 +413,7 @@ class Vault(object):
           print "Multiple users psaswords are supported only in version 4 of vault database."
           sys.exit(2)
         self.db_ver.db_add_user(self, existing_user_password, new_user_password)
-    
+
     def _read_from_file(self, filename, password):
         """
         Initialize all class members by loading the contents of a Vault stored in the given file.
@@ -493,7 +493,7 @@ class Vault(object):
         self.records.sort()
 
         self.db_ver.db_close()
-    
+
     def clear_records(self):
         i = 0
 
@@ -520,7 +520,7 @@ class Vault(object):
         # f_sha_ps should be already defined, why we want to regen it here.
         stretched_password = self.db_ver.db_get_stretched_passwd(self, password)
         self.f_sha_ps = hashlib.sha256(stretched_password).digest()
-        
+
         self.db_ver.db_write_header(self, password)
 
         cipher = TwofishECB(stretched_password)

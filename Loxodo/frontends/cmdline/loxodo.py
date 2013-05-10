@@ -288,10 +288,10 @@ class InteractiveConsole(cmd.Cmd):
         print ""
 
     # There must be better way to do this, this is quite unpleasant for user do work with.
-    # maybe sometuing like mod u [name], mod t [title], mod g [group], mod group.title
+    # maybe something like mod u [name], mod t [title], mod g [group], mod group.title
     def do_mod(self, line=None):
         """
-        Modify an entry from the vault. Every record is identified by group.title 
+        Modify an entry from the vault. Every record is identified by group.title
         locators if they are not provided entry is considered as title we try to match it against db.
         """
         if not self.vault:
@@ -307,8 +307,8 @@ class InteractiveConsole(cmd.Cmd):
         title = ""
         user = None
         group = None
-        
-        
+
+
         if pattern.match(line) is not None:
             uuid = line
         else:
@@ -318,12 +318,12 @@ class InteractiveConsole(cmd.Cmd):
             else:
                 line_elements = line.split(" ")
                 title = line_elements[0]
-                
+
                 if len(line_elements) == 2:
                     group = line_elements[1]
                 if len(line_elements) == 3:
                     user = line_elements[2]
-        
+
         match_records, nonmatch_records = self.mod_titles(title=title, uuid=uuid, user=user, group=group)
 
         if match_records is None:
@@ -414,7 +414,7 @@ class InteractiveConsole(cmd.Cmd):
             self.vault_modified = True
 
         print ""
-    
+
     def do_ls(self, line):
         """
         Show contents of this Vault. If an argument is added a case insensitive
@@ -482,7 +482,7 @@ class InteractiveConsole(cmd.Cmd):
         Change database format to v4
         """
         print "Database format used is %s" % self.vault_format
-    
+
     def do_uuid(self, line=None):
         """
         Change status of uuid
@@ -575,7 +575,7 @@ Username : %s""" % (record.group.encode('utf-8', 'replace'),
                 print "Last mod : %s" % time.strftime('%Y/%m/%d',time.gmtime(record.last_mod))
 
             print ""
-    
+
     def complete_show(self, text, line, begidx, endidx):
         if not text:
             completions = [record.title for record in self.vault.records]
@@ -623,7 +623,7 @@ Username : %s""" % (record.group.encode('utf-8', 'replace'),
             return None, nonmatches
         else:
             return matches, nonmatches
-    
+
     def find_titles(self, regexp):
         "Finds titles, username, group, or combination of all 3 matching a regular expression. (Case insensitive)"
         matches = []
