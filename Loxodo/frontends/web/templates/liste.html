@@ -14,9 +14,14 @@ $(window).load(function(){
 });
 });
 
+function copyToClipboard (text) {
+  window.prompt ("Copy to clipboard: Ctrl+C, Enter", text);
+}
+
 function showElementByVisible(obj) {
     if (document.getElementById(obj).style.visibility == "hidden") {
         document.getElementById(obj).style.visibility = "visible";
+        copyToClipboard(document.getElementById(obj).innerHTML)
         document.getElementById("show_hide_pwd_bt_"+obj).value="Hide Password";
     } else {
         document.getElementById(obj).style.visibility = "hidden";
