@@ -91,6 +91,14 @@ def index():
         name = None
     return render_template('index.html', name=name)
 
+@webloxo.app.route('/admin/addpass', methods=['GET', 'POST'])
+def addpass():
+  if request.method == 'POST':
+        new_password=request.form['password'].encode('utf-8','replace')
+        webloxo.vault.add_user_passwd(webloxo.password, new_password)
+        webloxo.vault.write_to_file(webloxo.vault_file, webloxo.password)
+  return render_template('open.html', vault_p=webloxo.db_path())
+
 @webloxo.app.route('/add', methods=['GET', 'POST'])
 def add():
   # It might be a good idea to encode passwords in base64 so we do not have
@@ -122,7 +130,6 @@ def mod():
     entry_id = request.form['mod_radio']
     vault_records = webloxo.vault.records[:]
 
-    pprint(request.form)
     for record in vault_records:
       if get_html_id(record.last_mod) == entry_id:
           if request.form['button'] == "Modify":
@@ -194,7 +201,7 @@ def login():
             return render_template('err.html', err_msg="Vault integrity check failed.")
 
         if webloxo.vault != None:
-          session['logged_in'] = request.form['password']
+          session['logged_in'] = request.form['vault_path']
         return redirect(url_for('index'))
     return render_template('open.html', vault_p=webloxo.db_path())
 
