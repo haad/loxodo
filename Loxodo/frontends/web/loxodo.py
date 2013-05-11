@@ -97,7 +97,7 @@ def addpass():
         new_password=request.form['password'].encode('utf-8','replace')
         webloxo.vault.add_user_passwd(webloxo.password, new_password)
         webloxo.vault.write_to_file(webloxo.vault_file, webloxo.password)
-  return render_template('open.html', vault_p=webloxo.db_path())
+  return render_template('addpass.html', vault_p=webloxo.db_path())
 
 @webloxo.app.route('/add', methods=['GET', 'POST'])
 def add():
