@@ -55,15 +55,15 @@ class InteractiveConsole(cmd.Cmd):
         self.prompt = "[none]> "
 
     def create_vault(self):
-        print "Creating " + self.vault_file_name + "..."
+        print(("Creating %s ..." % self.vault_file_name))
         try:
             self.vault_password = getpass.getpass("Vault password: ")
         except EOFError:
-            print "\n\nBye."
+            print ("\n\nBye.")
             raise RuntimeError("No password given")
 
         Vault.create(self.vault_password, filename=self.vault_file_name, format=self.vault_format)
-        print "... Done.\n"
+        print("... Done.\n")
 
     def set_prompt(self):
         if self.vault_modified:
@@ -76,29 +76,29 @@ class InteractiveConsole(cmd.Cmd):
         vault_action = "Opening"
         if not os.path.isfile(self.vault_file_name):
             vault_action = "Creating"
-        print "%s %s ..." % (vault_action, self.vault_file_name)
+        print(("%s %s ..." % (vault_action, self.vault_file_name)))
         try:
             self.vault_password = getpass.getpass("Vault password: ")
             if self.vault_password == "":
                 raise EOFError
         except EOFError:
-            print "\n\nBye."
+            print("\n\nBye.")
             raise RuntimeError("No password given")
         try:
             self.vault = Vault(self.vault_password, filename=self.vault_file_name, format=self.vault_format)
         except Vault.BadPasswordError:
-            print "Bad password."
+            print("Bad password.")
             raise
         except Vault.VaultVersionError:
-            print "This is not a PasswordSafe V3 or V4 Vault."
+            print("This is not a PasswordSafe V3 or V4 Vault.")
             raise
         except Vault.VaultFormatError:
-            print "Vault integrity check failed."
+            print("Vault integrity check failed.")
             raise
-        print "... Done.\n"
+        print("... Done.\n")
 
     def postloop(self):
-        print
+        print()
 
     def postcmd(self, stop, line):
         if stop == True:
@@ -125,18 +125,18 @@ class InteractiveConsole(cmd.Cmd):
             cmd.Cmd.do_help(self, line)
             return
 
-        print "\nCommands:"
-        print "  ".join(("ls", "show", 'add', 'mod', 'del', "save", 'quit', 'echo', 'sort', 'output', 'uuid', 'vi', 'tab', 'export'))
-        print
-        print "echo is %s" % self.echo
-        print "uuid is %s" % self.uuid
-        print "sort is %s" % self.sort_key
-        print "output is %s" % self.output
-        print
-        print "vi editing mode is %s" % self.vi
-        print "tab completition is %s" % self.tabcomp
-        print
-        print "Database format is set to %s" % self.vault_format
+        print("\nCommands:")
+        print(("  ".join(("ls", "show", 'add', 'mod', 'del', "save", 'quit', 'echo', 'sort', 'output', 'uuid', 'vi', 'tab', 'export'))))
+        print()
+        print(("echo is %s" % self.echo))
+        print(("uuid is %s" % self.uuid))
+        print(("sort is %s" % self.sort_key))
+        print(("output is %s" % self.output))
+        print()
+        print(("vi editing mode is %s" % self.vi))
+        print(("tab completition is %s" % self.tabcomp))
+        print()
+        print(("Database format is set to %s" % self.vault_format))
 
     # This method should clear all data in self.vault.records because we
     # can't control when will this be Garbadge collected we replace it
@@ -159,7 +159,7 @@ class InteractiveConsole(cmd.Cmd):
         if self.vault_modified and self.vault_file_name and self.vault_password:
             self.vault.write_to_file(self.vault_file_name, self.vault_password)
             self.vault_modified = False
-            print "Changes Saved"
+            print("Changes Saved")
 
     def do_EOF(self, line):
         """
@@ -189,10 +189,10 @@ class InteractiveConsole(cmd.Cmd):
 
         self.vault.records.append(entry)
         self.vault_modified = True
-        print "Entry Added, but vault not yet saved"
+        print("Entry Added, but vault not yet saved")
 
     def do_export(self, line=None):
-        print "Exporting file " + self.vault_file_name + "..."
+        print(("Exporting file " + self.vault_file_name + "..."))
         self.vault.export(self.vault_password, self.vault_file_name)
 
     def prompt_password(self, old_password=None):
@@ -210,7 +210,7 @@ class InteractiveConsole(cmd.Cmd):
                 while True:
                     passwd = random_password().generate_password(password_policy)
                     created_random_password = True
-                    print "Generated password: %s" % passwd
+                    print(("Generated password: %s" % passwd))
                     while True:
                         accept_password = getpass._raw_input('Enter [y] to accept, [ENTER] for random ')
                         if accept_password in password_policy:
@@ -218,7 +218,7 @@ class InteractiveConsole(cmd.Cmd):
                                 password_policy[accept_password] = False
                             else:
                                 password_policy[accept_password] = True
-                            print password_policy
+                            print(password_policy)
                         else:
                             break
                     if accept_password.lower() == "y":
@@ -233,7 +233,7 @@ class InteractiveConsole(cmd.Cmd):
                 if passwd2 == '.':
                     passwd2 = ''
                 if passwd != passwd2:
-                    print "Passwords don't match"
+                    print("Passwords don't match")
                 elif passwd == "":
                     empty_passwd = getpass.getpass("Password is empty. Enter Y to accept ")
                     if empty_passwd.lower() == "y":
@@ -267,25 +267,25 @@ class InteractiveConsole(cmd.Cmd):
         match_records, nonmatch_records = self.mod_titles(title=title, uuid=uuid, user=user, group=group)
 
         if match_records is None:
-            print "No matches found."
+            print("No matches found.")
             return
 
         if len(match_records) > 1:
-            print "Too many records matched your search criteria"
+            print("Too many records matched your search criteria")
             for record in match_records:
-                print "%s [%s] " % (record.title.encode('utf-8', 'replace'), record.user.encode('utf-8', 'replace'))
+                print(("%s [%s] " % (record.title.encode('utf-8', 'replace'), record.user.encode('utf-8', 'replace'))))
                 return
 
         if len(match_records) == 1:
-            print "Deleting the following record:"
+            print("Deleting the following record:")
             self.do_show(str(match_records[0].uuid))
             confirm_delete = getpass._raw_input("Confirm you want to delete the record [YES]: ")
             if confirm_delete.lower() == 'yes':
                 self.vault.records = nonmatch_records
-                print "Entry Deleted, but vault not yet saved"
+                print("Entry Deleted, but vault not yet saved")
                 self.vault_modified = True
 
-        print ""
+        print("")
 
     # There must be better way to do this, this is quite unpleasant for user do work with.
     # maybe something like mod u [name], mod t [title], mod g [group], mod group.title
@@ -327,25 +327,25 @@ class InteractiveConsole(cmd.Cmd):
         match_records, nonmatch_records = self.mod_titles(title=title, uuid=uuid, user=user, group=group)
 
         if match_records is None:
-            print "No matches found."
+            print("No matches found.")
             return
 
         if len(match_records) > 1:
-            print "Too many records matched your search criteria"
+            print("Too many records matched your search criteria")
             for record in match_records:
-                print "%s [%s] " % (record.title.encode('utf-8', 'replace'), record.user.encode('utf-8', 'replace'))
+                print(("%s [%s] " % (record.title.encode('utf-8', 'replace'), record.user.encode('utf-8', 'replace'))))
                 return
 
         _vault_modified = False
         record = match_records[0]
         new_record = {}
 
-        print ''
+        print('')
         if self.uuid is True:
-            print 'Uuid: [%s]' % str(record.uuid)
-        print 'Modifying: [%s.%s]' % (record.group.encode('utf-8', 'replace'), record.title.encode('utf-8', 'replace'))
-        print 'Enter a single dot (.) to clear the field.'
-        print ''
+            print(('Uuid: [%s]' % str(record.uuid)))
+        print(('Modifying: [%s.%s]' % (record.group.encode('utf-8', 'replace'), record.title.encode('utf-8', 'replace'))))
+        print('Enter a single dot (.) to clear the field.')
+        print('')
 
         new_record['group'] = getpass._raw_input('Group [%s]: ' % record.group)
 
@@ -379,8 +379,8 @@ class InteractiveConsole(cmd.Cmd):
             _vault_modified = True
 
         if record.notes.encode('utf-8', 'replace') != "":
-            print '[NOTES]'
-            print '%s' % record.notes
+            print('[NOTES]')
+            print(('%s' % record.notes))
 
         new_record['notes'] = getpass._raw_input('Entry\'s notes: ')
 
@@ -410,10 +410,10 @@ class InteractiveConsole(cmd.Cmd):
 
             self.vault.records = nonmatch_records
             self.vault.records.append(record)
-            print "Entry Modified, but vault not yet saved"
+            print("Entry Modified, but vault not yet saved")
             self.vault_modified = True
 
-        print ""
+        print("")
 
     def do_ls(self, line):
         """
@@ -434,28 +434,28 @@ class InteractiveConsole(cmd.Cmd):
             vault_records.sort(lambda e1, e2: cmp(e1.last_mod, e2.last_mod))
 
         if vault_records is None:
-            print "No matches found."
+            print("No matches found.")
             return
 
-        print ""
-        print "[group.title] username"
-        print "URL: url"
-        print "Notes: notes"
-        print "Last mod: modification time"
-        print "-"*10
+        print("")
+        print("[group.title] username")
+        print("URL: url")
+        print("Notes: notes")
+        print("Last mod: modification time")
+        print(("-"*10))
         for record in vault_records:
-            print "[%s.%s] %s" % (record.group.encode('utf-8', 'replace'),
+            print(("[%s.%s] %s" % (record.group.encode('utf-8', 'replace'),
                                    record.title.encode('utf-8', 'replace'),
-                                   record.user.encode('utf-8', 'replace'))
+                                   record.user.encode('utf-8', 'replace'))))
             if self.output == 'verbose':
               if record.url:
-                  print "    URL: %s" % (record.url.encode('utf-8', 'replace'))
+                  print(("    URL: %s" % (record.url.encode('utf-8', 'replace'))))
               if record.notes:
-                  print "    Notes: %s" % (record.notes.encode('utf-8', 'replace'))
+                  print(("    Notes: %s" % (record.notes.encode('utf-8', 'replace'))))
               if record.last_mod != 0:
-                  print "    Last mod: %s" % time.strftime('%Y/%m/%d',time.gmtime(record.last_mod))
-        print "-"*15
-        print ""
+                  print(("    Last mod: %s" % time.strftime('%Y/%m/%d',time.gmtime(record.last_mod))))
+        print(("-"*15))
+        print("")
 
     def do_output(self, line=None):
         """
@@ -465,7 +465,7 @@ class InteractiveConsole(cmd.Cmd):
             self.output = 'verbose'
         else:
             self.output = 'brief'
-        print "output is %s" % self.output
+        print(("output is %s" % self.output))
 
     def do_sort(self, line=None):
         """
@@ -475,13 +475,13 @@ class InteractiveConsole(cmd.Cmd):
             self.sort_key = 'mod'
         else:
             self.sort_key = 'alpha'
-        print "sort key is %s" % self.sort_key
+        print(("sort key is %s" % self.sort_key))
 
     def do_format(self, line=None):
         """
         Change database format to v4
         """
-        print "Database format used is %s" % self.vault_format
+        print(("Database format used is %s" % self.vault_format))
 
     def do_uuid(self, line=None):
         """
@@ -491,7 +491,7 @@ class InteractiveConsole(cmd.Cmd):
             self.uuid = True
         else:
             self.uuid = False
-        print "uuid is %s" % self.uuid
+        print(("uuid is %s" % self.uuid))
 
     def do_echo(self, line=None):
         """
@@ -501,7 +501,7 @@ class InteractiveConsole(cmd.Cmd):
             self.echo = True
         else:
             self.echo = False
-        print "echo is %s" % self.echo
+        print(("echo is %s" % self.echo))
 
     def do_vi(self, line=None):
         """
@@ -514,7 +514,7 @@ class InteractiveConsole(cmd.Cmd):
             self.vi = False
             readline.parse_and_bind('set editing-mode emacs')
 
-        print "Vi Editing mode is %s" % self.vi
+        print(("Vi Editing mode is %s" % self.vi))
 
     def do_tab(self, line=None):
         """
@@ -527,7 +527,7 @@ class InteractiveConsole(cmd.Cmd):
             self.tabcomp = False
             readline.parse_and_bind('tab: noncomplete')
 
-        print "TAB completition mode is %s" % self.tabcomp
+        print(("TAB completition mode is %s" % self.tabcomp))
 
     def do_show(self, line, echo=True, passwd=False, uuid=False):
         """
@@ -540,7 +540,7 @@ class InteractiveConsole(cmd.Cmd):
         matches = self.find_titles(line)
 
         if matches is None:
-            print 'No entry found for "%s"' % line
+            print(('No entry found for "%s"' % line))
             return
 
         if self.echo is not None:
@@ -553,28 +553,28 @@ class InteractiveConsole(cmd.Cmd):
         else:
             do_uuid = uuid
 
-        print ""
+        print("")
         for record in matches:
             if do_uuid == True:
-                print "[%s]" % record.uuid
-            print """[%s.%s]
+                print(("[%s]" % record.uuid))
+            print(("""[%s.%s]
 Username : %s""" % (record.group.encode('utf-8', 'replace'),
                     record.title.encode('utf-8', 'replace'),
-                    record.user.encode('utf-8', 'replace'))
+                    record.user.encode('utf-8', 'replace'))))
 
             if do_echo is True:
-                print "Password : %s" % record.passwd.encode('utf-8', 'replace')
+                print(("Password : %s" % record.passwd.encode('utf-8', 'replace')))
 
             if record.notes.strip():
-                print "Notes    : %s" % record.notes.encode('utf-8', 'replace')
+                print(("Notes    : %s" % record.notes.encode('utf-8', 'replace')))
 
             if record.url:
-                print "URL      : %s" % record.url.encode('utf-8', 'replace')
+                print(("URL      : %s" % record.url.encode('utf-8', 'replace')))
 
             if record.last_mod != 0:
-                print "Last mod : %s" % time.strftime('%Y/%m/%d',time.gmtime(record.last_mod))
+                print(("Last mod : %s" % time.strftime('%Y/%m/%d',time.gmtime(record.last_mod))))
 
-            print ""
+            print("")
 
     def complete_show(self, text, line, begidx, endidx):
         if not text:
@@ -669,12 +669,12 @@ def main(argv):
     if (len(args) < 1):
         if (config.recentvaults):
             interactiveConsole.vault_file_name = config.recentvaults[0]
-            print "No Vault specified, using %s" % interactiveConsole.vault_file_name
+            print(("No Vault specified, using %s" % interactiveConsole.vault_file_name))
         else:
-            print "No Vault specified, and none found in config."
+            print("No Vault specified, and none found in config.")
             sys.exit(2)
     elif (len(args) > 1):
-        print "More than one Vault specified"
+        print("More than one Vault specified")
         sys.exit(2)
     else:
         interactiveConsole.vault_file_name = args[0]
@@ -699,7 +699,7 @@ def main(argv):
             interactiveConsole.do_export()
         elif options.do_password:
           if interactiveConsole.vault.get_vault_format() != "v4":
-            print "Can't use -P option with non v4 database format which is used by default."
+            print("Can't use -P option with non v4 database format which is used by default.")
             sys.exit(2)
           interactiveConsole.do_password()
         else:

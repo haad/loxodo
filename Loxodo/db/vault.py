@@ -296,7 +296,7 @@ class Vault(object):
             Merge in fields from another Record, replacing existing ones
             """
             self.raw_fields = {}
-            for field in record.raw_fields.values():
+            for field in list(record.raw_fields.values()):
                 self.add_raw_field(field)
 
         uuid = property(_get_uuid, _set_uuid)
@@ -389,7 +389,7 @@ class Vault(object):
 
     def _create_empty(self, password):
 
-        assert type(password) != unicode
+        assert type(password) != str
 
         if self.db_format == "v3":
           self.db_ver = VaultVer3()
@@ -400,17 +400,17 @@ class Vault(object):
 
     def export(self, password, filename):
         #self._read_from_file(filename, password)
-        print "# passwordsafe version "+self.db_format+" database"
-        print "uuid,group,name,login,passwd,notes,url"
+        print("# passwordsafe version %d database" % self.db_format)
+        print("uuid,group,name,login,passwd,notes,url")
         for record in self.records:
-            print "\"" + str(record.uuid) + "," + record.group + "," + record.title + "," + record.user + "," + record.passwd + "," + record.notes + "," + record.url
+            print("%s, %s, %s, %s, %s, %s, %s" % str(record.uuid), record.group, record.title, record.user, record.passwd, record.notes, record.url)
 
     def get_vault_format(self):
         return self.db_format
 
     def add_user_passwd(self, existing_user_password, new_user_password):
         if self.db_format != "v4":
-          print "Multiple users psaswords are supported only in version 4 of vault database."
+          print("Multiple users psaswords are supported only in version 4 of vault database.")
           sys.exit(2)
         self.db_ver.db_add_user(self, existing_user_password, new_user_password)
 
@@ -418,7 +418,7 @@ class Vault(object):
         """
         Initialize all class members by loading the contents of a Vault stored in the given file.
         """
-        assert type(password) != unicode
+        assert type(password) != str
 
         ver3 = VaultVer3()
         ver4 = VaultVer4()
@@ -438,7 +438,7 @@ class Vault(object):
           if self.db_format == "auto":
             self.db_format = self.db_ver.db_format
           else:
-            print "Database version missmatch I was asked to open database with version %s and it's a %s version" % (self.db_format, self.db_ver.db_format)
+            print("Database version missmatch I was asked to open database with version %s and it's a %s version" % (self.db_format, self.db_ver.db_format))
             sys.exit(1)
 
         # Open password database
@@ -505,7 +505,7 @@ class Vault(object):
         """
         Store contents of this Vault into a file.
         """
-        assert type(password) != unicode
+        assert type(password) != str
 
         _last_save = struct.pack("<L", int(time.time()))
         self.header.raw_fields[0x04] = self.Field(0x04, len(_last_save), _last_save)
@@ -532,14 +532,14 @@ class Vault(object):
 
         end_of_record = self.Field(0xff, 0, "")
 
-        for field in self.header.raw_fields.values():
+        for field in list(self.header.raw_fields.values()):
             self._write_field_tlv(cipher, field)
             hmac_checker.update(field.raw_value)
         self._write_field_tlv(cipher, end_of_record)
         hmac_checker.update(end_of_record.raw_value)
 
         for record in self.records:
-            for field in record.raw_fields.values():
+            for field in list(record.raw_fields.values()):
                 self._write_field_tlv(cipher, field)
                 hmac_checker.update(field.raw_value)
             self._write_field_tlv(cipher, end_of_record)

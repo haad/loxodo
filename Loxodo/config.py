@@ -19,7 +19,7 @@
 
 import os
 import platform
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 MAIL_SERVER = 'localhost'
 MAIL_PORT = 25

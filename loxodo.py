@@ -14,9 +14,9 @@ from Loxodo.config import config
 
 # store base script name, taking special care if we're "frozen" using py2app or py2exe
 if hasattr(sys,"frozen") and (sys.platform != 'darwin'):
-    config.set_basescript(unicode(sys.executable, sys.getfilesystemencoding()))
+    config.set_basescript(str(sys.executable, sys.getfilesystemencoding()))
 else:
-    config.set_basescript(unicode(__file__, sys.getfilesystemencoding()))
+    config.set_basescript(str(__file__, sys.getfilesystemencoding()))
 
 # If cmdline arguments were given, use the "cmdline" frontend.
 if len(sys.argv) > 1:
@@ -26,10 +26,10 @@ if len(sys.argv) > 1:
 # In all other cases, use the "wx" frontend.    
 try:
     import wx
-except ImportError, e:
-    print >> sys.stderr, 'Could not find wxPython, the wxWidgets Python bindings: %s' % e
-    print >> sys.stderr, 'Falling back to cmdline frontend.'
-    print >> sys.stderr, ''
+except ImportError as e:
+    print('Could not find wxPython, the wxWidgets Python bindings: %s' % e, file=sys.stderr)
+    print('Falling back to cmdline frontend.', file=sys.stderr)
+    print('', file=sys.stderr)
     from Loxodo.frontends.cmdline import loxodo
     sys.exit()
 

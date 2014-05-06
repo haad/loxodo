@@ -40,48 +40,48 @@ class VaultVer4(object):
     self.db_ptag = ['PSTW', 'PSAE']
     self.db_dbtag = 'PWDB'
     self.db_format = 'v4'
-    
+
     self.db_filename = None
     self.__filehandle = None
-    
+
     self.db_v4_passwds = []
-  
+
   def db_open(self, filename=None, mode='rb'):
     self.db_filename = filename
     if self.db_filename:
       self.__filehandle = file(filename, mode)
-  
+
   def db_close(self):
     self.db_filename = None
     self.__filehandle.close()
-  
+
   def db_end_data(self):
     # Write end tag only if file was opened for write.
     if self.__filehandle.mode == 'wb':
       self.__filehandle.write(self.db_end_tag)
-  
+
   # Read length of bytes from db file version 3
   def db_read_data (self, length):
     return self.__filehandle.read(length)
-  
-  # Write length of bytes to db file version 3  
+
+  # Write length of bytes to db file version 3
   def db_write_data (self, data):
     return self.__filehandle.write(data)
-  
+
   # Test if we have correct begin tag for version 3 db
   def db_test_bg_tag (self, tag):
     if (self.db_version_tag == tag):
       return True
     else:
       return False
-  
+
   # Test if we got correct end tag for db v3
   def db_test_end_tag (self, tag):
     if (self.db_end_tag == tag):
       return True
     else:
       return False
-  
+
   def db_get_stretched_passwd(self, vault, password):
     for item in self.db_v4_passwds:
       if item['orig'] == '1':
@@ -90,21 +90,21 @@ class VaultVer4(object):
         if hashlib.sha256(cipher.decrypt(item['passwd'])).digest() == vault.f_sha_ps:
           return cipher.decrypt(item['passwd'])
     return ""
-  
+
   # Read header from file to Vault
   def db_read_header(self, password, vault):
     vault.f_tag = self.__filehandle.read(4)  # TAG: magic tag
-    
+
     if vault.f_tag != self.db_version_tag:
-      raise DBError, "Wrong database version string giving up."
-    
-    # Add all user passwords/auth_tags from vault db to list 
+      raise DBError("Wrong database version string giving up.")
+
+    # Add all user passwords/auth_tags from vault db to list
     while True:
       auth_tag = self.__filehandle.read(4)
       if auth_tag == self.db_dbtag:
         break
       self.db_v4_passwds.append({'auth': auth_tag, 'passwd': self.__filehandle.read(32), 'orig': '1'})
-    
+
     vault.f_salt = self.__filehandle.read(32)  # SALT: SHA-256 salt
     vault.f_iter = struct.unpack("<L", self.__filehandle.read(4))[0]  # ITER: SHA-256 keystretch iterations
     vault.f_sha_ps = self.__filehandle.read(32) # H(P'): SHA-256 hash of stretched passphrase
@@ -113,7 +113,7 @@ class VaultVer4(object):
     vault.f_b3 = self.__filehandle.read(16)  # B3
     vault.f_b4 = self.__filehandle.read(16)  # B4
     vault.f_iv = self.__filehandle.read(16)  # IV: initialization vector of Twofish CBC
-  
+
   # Create empty Vault for v3 db
   # password argument is secondary password from user
   def db_create_header(self, password, vault):
@@ -127,7 +127,7 @@ class VaultVer4(object):
     rand_p = random_password()
     rand_p.password_length = 32
     master_passwd = rand_p.generate_password()
-    
+
     stretched_master_password = vault._stretch_password(master_passwd, vault.f_salt, vault.f_iter)
     vault.f_sha_ps = hashlib.sha256(stretched_master_password).digest()
 
@@ -147,12 +147,12 @@ class VaultVer4(object):
 
     # No records yet
     vault.f_hmac = hmac_checker.digest()
-  
+
     # Encrypt master password with user one
     stretched_user_pass = vault._stretch_password(password, vault.f_salt, vault.f_iter)
     user_cipher = TwofishECB(stretched_user_pass)
     self.db_v4_passwds = [{'auth': self.db_ptag[0], 'passwd': user_cipher.encrypt(stretched_master_password), 'orig': '1'}]
-  
+
   def db_write_header(self, vault, password):
     # FIXME: choose new SALT, B1-B4, IV values on each file write? Conflicting Specs!
 
@@ -177,7 +177,7 @@ class VaultVer4(object):
     self.__filehandle.write(vault.f_iv)
 
   #
-  # Go through all loaded passwords from file and try to find working one. 
+  # Go through all loaded passwords from file and try to find working one.
   # Working one == password which decypts it's saved passwd correctly (it's digest is same as sha_ps)
   # When we have working password use decrypted master password, and encypt it with new user password.
   #

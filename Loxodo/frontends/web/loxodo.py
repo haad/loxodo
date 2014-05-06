@@ -58,7 +58,7 @@ class Webloxodo(Flask):
     try:
       self.mail.send(msg)
     except socket_error as serr:
-      print "Sent email failed"+str(serr.errno)
+      print(("Sent email failed"+str(serr.errno)))
 
 def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     str_time = time.gmtime(value)

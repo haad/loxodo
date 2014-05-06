@@ -4,3 +4,4 @@
 Loxodo*egg*
 dist/
 tmp/
+*.bak
