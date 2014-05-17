@@ -66,9 +66,10 @@ class TwofishCBC:
         """
         Return the bitwise xor of two arbitrary-length blocks of data
         """
-        return "".join(
+        res=b""
+        return res.join(
                        map(
-                           lambda c1, c2: chr(operator.xor(ord(c1), ord(c2))),
+                           lambda c1, c2: bytes([operator.xor(c1, c2)]),
                            text1,
                            text2
                            )
