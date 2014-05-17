@@ -5,3 +5,5 @@ Loxodo*egg*
 dist/
 tmp/
 *.bak
+build/**
+*.egg
