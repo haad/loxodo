@@ -14,16 +14,16 @@ from Loxodo.config import config
 
 # store base script name, taking special care if we're "frozen" using py2app or py2exe
 if hasattr(sys,"frozen") and (sys.platform != 'darwin'):
-    config.set_basescript(str(sys.executable, sys.getfilesystemencoding()))
+    config.set_basescript(sys.executable)
 else:
-    config.set_basescript(str(__file__, sys.getfilesystemencoding()))
+    config.set_basescript(__file__)
 
 # If cmdline arguments were given, use the "cmdline" frontend.
 if len(sys.argv) > 1:
     from Loxodo.frontends.cmdline import loxodo
     sys.exit()
 
-# In all other cases, use the "wx" frontend.    
+# In all other cases, use the "wx" frontend.
 try:
     import wx
 except ImportError as e:

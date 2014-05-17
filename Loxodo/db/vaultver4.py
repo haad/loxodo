@@ -27,7 +27,6 @@ import time
 import uuid
 
 from ..twofish.twofish_ecb import TwofishECB
-from ..twofish.twofish_cbc import TwofishCBC
 from ..random_password import random_password
 
 class VaultVer4(object):
@@ -142,8 +141,6 @@ class VaultVer4(object):
     vault.f_iv = vault.urandom(16)
 
     hmac_checker = HMAC(key_l, "", hashlib.sha256)
-    # XXX this is not needed here ?
-    cipher = TwofishCBC(key_k, vault.f_iv)
 
     # No records yet
     vault.f_hmac = hmac_checker.digest()

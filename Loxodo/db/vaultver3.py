@@ -27,7 +27,6 @@ import time
 import uuid
 
 from ..twofish.twofish_ecb import TwofishECB
-from ..twofish.twofish_cbc import TwofishCBC
 
 class VaultVer3(object):
   """
@@ -37,49 +36,49 @@ class VaultVer3(object):
     self.db_version_tag = 'PWS3'
     self.db_end_tag = 'PWS3-EOFPWS3-EOF'
     self.db_format = 'v3'
-    
+
     self.db_filename = None
     self.__filehandle = None
-  
+
   def db_open(self, filename=None, mode='rb'):
     self.db_filename = filename
     if self.db_filename:
       self.__filehandle = file(filename, mode)
-  
+
   def db_close(self):
     self.db_filename = None
     self.__filehandle.close()
-  
+
   def db_end_data(self):
     # Write end tag only if file was opened for write.
     if self.__filehandle.mode == 'wb':
       self.__filehandle.write(self.db_end_tag)
-  
+
   # Read length of bytes from db file version 3
   def db_read_data (self, length):
     return self.__filehandle.read(length)
-  
-  # Write length of bytes to db file version 3  
+
+  # Write length of bytes to db file version 3
   def db_write_data (self, data):
     return self.__filehandle.write(data)
-  
+
   # Test if we have correct begin tag for version 3 db
   def db_test_bg_tag (self, tag):
     if (self.db_version_tag == tag):
       return True
     else:
       return False
-  
+
   # Test if we got correct end tag for db v3
   def db_test_end_tag (self, tag):
     if (self.db_end_tag == tag):
       return True
     else:
       return False
-      
+
   def db_get_stretched_passwd(self, vault, password):
     return vault._stretch_password(password, vault.f_salt, vault.f_iter)
-  
+
   # Read header from file to Vault
   def db_read_header(self, password, vault):
     vault.f_tag = self.__filehandle.read(4)  # TAG: magic tag
@@ -91,16 +90,16 @@ class VaultVer3(object):
     vault.f_b3 = self.__filehandle.read(16)  # B3
     vault.f_b4 = self.__filehandle.read(16)  # B4
     vault.f_iv = self.__filehandle.read(16)  # IV: initialization vector of Twofish CBC
-  
+
   # Create empty Vault for v3 db
   def db_create_header(self, password, vault):
     vault.f_tag = self.db_version_tag
     vault.f_salt = vault.urandom(32)
     vault.f_iter = 2048
-    
+
     stretched_password = vault._stretch_password(password, vault.f_salt, vault.f_iter)
     vault.f_sha_ps = hashlib.sha256(stretched_password).digest()
-    
+
     cipher = TwofishECB(stretched_password)
     vault.f_b1 = cipher.encrypt(vault.urandom(16))
     vault.f_b2 = cipher.encrypt(vault.urandom(16))
@@ -112,12 +111,10 @@ class VaultVer3(object):
     vault.f_iv = vault.urandom(16)
 
     hmac_checker = HMAC(key_l, "", hashlib.sha256)
-    # XXX this is not needed here ?
-    cipher = TwofishCBC(key_k, vault.f_iv)
 
     # No records yet
     vault.f_hmac = hmac_checker.digest()
-    
+
 
   def db_write_header(self, vault, password):
     # FIXME: choose new SALT, B1-B4, IV values on each file write? Conflicting Specs!
@@ -135,4 +132,3 @@ class VaultVer3(object):
     self.__filehandle.write(vault.f_b4)
 
     self.__filehandle.write(vault.f_iv)
-    
