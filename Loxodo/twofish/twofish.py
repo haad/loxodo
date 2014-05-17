@@ -50,9 +50,6 @@ class Twofish:
 
     def set_key(self, key):
         """Init."""
-        print("#!@#! ---- %s" % key.__class__.__name__)
-        print(" ---- %d" % len(key))
-
         key_len = len(key)
         if key_len not in [16, 24, 32]:
             # XXX: add padding?
