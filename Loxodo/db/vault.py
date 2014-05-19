@@ -27,8 +27,8 @@ import time
 import uuid
 import sys
 
-from ..twofish.twofish_ecb import TwofishECB
-from ..twofish.twofish_cbc import TwofishCBC
+from ..crypto.twofish.twofish_ecb import TwofishECB
+from ..crypto.twofish.twofish_cbc import TwofishCBC
 
 from .vaultver4 import VaultVer4
 from .vaultver3 import VaultVer3
@@ -98,7 +98,7 @@ class Vault(object):
             self._create_empty(password)
         else:
             if not os.path.isfile(filename):
-                self._create_empty(password)
+                self._create_empty(bytes(password, 'UTF-8'))
             else:
                 self._read_from_file(filename, password)
 
@@ -257,7 +257,7 @@ class Vault(object):
             return self._last_mod
 
         def _set_last_mod(self, value):
-            assert type(value) == int
+            assert isinstance(value, int)
             self._last_mod = value
             raw_id = 0x0c
             if (raw_id not in self.raw_fields):
@@ -323,6 +323,10 @@ class Vault(object):
         The algorithm is described in the following paper:
         [KEYSTRETCH Section 4.1] http://www.schneier.com/paper-low-entropy.pdf
         """
+
+        assert isinstance(password, bytes)
+        assert isinstance(salt, bytes)
+
         sha = hashlib.sha256()
         sha.update(password)
         sha.update(salt)
@@ -342,7 +346,7 @@ class Vault(object):
             return None
         data = cipher.decrypt(data)
         raw_len = struct.unpack("<L", data[0:4])[0]
-        raw_type = struct.unpack("<B", data[4])[0]
+        raw_type = struct.unpack("<B", bytes([data[4]]))[0]
         raw_value = data[5:]
         if (raw_len > 11):
             for dummy in range((raw_len+4)//16):
@@ -367,6 +371,7 @@ class Vault(object):
         Write one field of a vault record using the given file handle.
         """
         assert len(field.raw_value) == field.raw_len
+        assert isinstance(field.raw_value, bytes)
 
         raw_len = struct.pack("<L", field.raw_len)
         raw_type = struct.pack("<B", field.raw_type)
@@ -388,8 +393,7 @@ class Vault(object):
         vault.write_to_file(filename, password)
 
     def _create_empty(self, password):
-
-        assert type(password) != str
+        assert isinstance(password, bytes)
 
         if self.db_format == "v3":
           self.db_ver = VaultVer3()
@@ -418,13 +422,14 @@ class Vault(object):
         """
         Initialize all class members by loading the contents of a Vault stored in the given file.
         """
-        assert type(password) != str
+        assert isinstance(password, bytes)
+        assert isinstance(filename, str)
 
         ver3 = VaultVer3()
         ver4 = VaultVer4()
 
         # Read begining database tag and set db_ver db file access class
-        tag = file(filename, 'rb').read(4)
+        tag = open(filename, 'rb').read(4)
 
         # Auto detect database type for existing vaults
         if (ver3.db_test_bg_tag(tag)):
@@ -457,7 +462,7 @@ class Vault(object):
         key_k = cipher.decrypt(self.f_b1) + cipher.decrypt(self.f_b2)
         key_l = cipher.decrypt(self.f_b3) + cipher.decrypt(self.f_b4)
 
-        hmac_checker = HMAC(key_l, "", hashlib.sha256)
+        hmac_checker = HMAC(key_l, b"", hashlib.sha256)
         cipher = TwofishCBC(key_k, self.f_iv)
 
         # read header
@@ -505,12 +510,12 @@ class Vault(object):
         """
         Store contents of this Vault into a file.
         """
-        assert type(password) != str
+        assert isinstance(password, bytes)
 
         _last_save = struct.pack("<L", int(time.time()))
         self.header.raw_fields[0x04] = self.Field(0x04, len(_last_save), _last_save)
-        _what_saved = prog_name+" "+prog_version.encode("utf_8", "replace")
-        self.header.raw_fields[0x06] = self.Field(0x06, len(_what_saved), _what_saved)
+        _what_saved = prog_name+" "+prog_version
+        self.header.raw_fields[0x06] = self.Field(0x06, len(_what_saved), bytes(_what_saved, 'UTF-8'))
 
         # write to temporary file first
         (osfilehandle, tmpfilename) = tempfile.mkstemp('.part', os.path.basename(filename) + ".", os.path.dirname(filename), text=False)
@@ -527,10 +532,10 @@ class Vault(object):
         key_k = cipher.decrypt(self.f_b1) + cipher.decrypt(self.f_b2)
         key_l = cipher.decrypt(self.f_b3) + cipher.decrypt(self.f_b4)
 
-        hmac_checker = HMAC(key_l, "", hashlib.sha256)
+        hmac_checker = HMAC(key_l, b"", hashlib.sha256)
         cipher = TwofishCBC(key_k, self.f_iv)
 
-        end_of_record = self.Field(0xff, 0, "")
+        end_of_record = self.Field(0xff, 0, b"")
 
         for field in list(self.header.raw_fields.values()):
             self._write_field_tlv(cipher, field)

@@ -26,7 +26,7 @@ import tempfile
 import time
 import uuid
 
-from ..twofish.twofish_ecb import TwofishECB
+from ..crypto.twofish.twofish_ecb import TwofishECB
 
 class VaultVer3(object):
   """
@@ -110,7 +110,7 @@ class VaultVer3(object):
 
     vault.f_iv = vault.urandom(16)
 
-    hmac_checker = HMAC(key_l, "", hashlib.sha256)
+    hmac_checker = HMAC(key_l, b"", hashlib.sha256)
 
     # No records yet
     vault.f_hmac = hmac_checker.digest()

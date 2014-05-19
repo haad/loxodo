@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from setuptools import setup
+from setuptools import setup, find_packages
 
 extra_options = dict(
     name="Loxodo",
@@ -13,8 +13,9 @@ extra_options = dict(
     include_package_data=True,
     app = ['loxodo.py', 'web-loxodo.py'],
     scripts = ['loxodo.py', 'web-loxodo.py'],
-    packages = ['Loxodo', 'Loxodo/db', 'Loxodo/twofish', 'Loxodo/frontends', 'Loxodo/frontends/cmdline', 'Loxodo/frontends/web'],
-    install_requires=['flask', 'jinja2', 'flask-mail']
+    packages = find_packages('Loxodo'),
+    package_dir = {'':'Loxodo'},
+    install_requires=['flask', 'jinja2', 'flask-mail', 'cryptography']
 )
 setup(**extra_options)
 

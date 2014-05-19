@@ -85,7 +85,7 @@ class InteractiveConsole(cmd.Cmd):
             print("\n\nBye.")
             raise RuntimeError("No password given")
         try:
-            self.vault = Vault(self.vault_password, filename=self.vault_file_name, format=self.vault_format)
+            self.vault = Vault(bytes(self.vault_password, 'UTF-8'), filename=self.vault_file_name, format=self.vault_format)
         except Vault.BadPasswordError:
             print("Bad password.")
             raise
@@ -157,7 +157,7 @@ class InteractiveConsole(cmd.Cmd):
         Save the vault without exiting.
         """
         if self.vault_modified and self.vault_file_name and self.vault_password:
-            self.vault.write_to_file(self.vault_file_name, self.vault_password)
+            self.vault.write_to_file(self.vault_file_name, bytes(self.vault_password, 'UTF-8'))
             self.vault_modified = False
             print("Changes Saved")
 
@@ -427,6 +427,11 @@ class InteractiveConsole(cmd.Cmd):
             vault_records = self.find_titles(line)
         else:
             vault_records = self.vault.records[:]
+
+        if not vault_records:
+            print("No records found in Vault.")
+            return
+        import ipdb; ipdb.set_trace()
 
         if self.sort_key == 'alpha':
             vault_records.sort(lambda e1, e2: cmp(e1.title, e2.title))

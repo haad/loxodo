@@ -17,9 +17,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-from . import twofish
+import os, sys
+
+lib_path = os.path.abspath('.')
+sys.path.append(lib_path)
+
 import operator
 
+from . import twofish
 
 class TwofishCBC:
     """

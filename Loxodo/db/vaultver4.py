@@ -26,7 +26,7 @@ import tempfile
 import time
 import uuid
 
-from ..twofish.twofish_ecb import TwofishECB
+from ..crypto.twofish.twofish_ecb import TwofishECB
 from ..random_password import random_password
 
 class VaultVer4(object):
@@ -34,38 +34,38 @@ class VaultVer4(object):
     PWD database version 4 access class
   """
   def __init__ (self):
-    self.db_version_tag = 'PWS4'
-    self.db_end_tag = 'PWS4-EOFPWS4-EOF'
-    self.db_ptag = ['PSTW', 'PSAE']
-    self.db_dbtag = 'PWDB'
-    self.db_format = 'v4'
+    self.db_version_tag = b'PWS4'
+    self.db_end_tag = b'PWS4-EOFPWS4-EOF'
+    self.db_ptag = [b'PSTW', b'PSAE']
+    self.db_dbtag = b'PWDB'
+    self.db_format = b'v4'
 
     self.db_filename = None
-    self.__filehandle = None
+    self.db_filehandle = None
 
     self.db_v4_passwds = []
 
   def db_open(self, filename=None, mode='rb'):
     self.db_filename = filename
     if self.db_filename:
-      self.__filehandle = file(filename, mode)
+      self.db_filehandle = open(filename, mode)
 
   def db_close(self):
     self.db_filename = None
-    self.__filehandle.close()
+    self.db_filehandle.close()
 
   def db_end_data(self):
     # Write end tag only if file was opened for write.
-    if self.__filehandle.mode == 'wb':
-      self.__filehandle.write(self.db_end_tag)
+    if self.db_filehandle.mode == 'wb':
+      self.db_filehandle.write(self.db_end_tag)
 
   # Read length of bytes from db file version 3
   def db_read_data (self, length):
-    return self.__filehandle.read(length)
+    return self.db_filehandle.read(length)
 
   # Write length of bytes to db file version 3
   def db_write_data (self, data):
-    return self.__filehandle.write(data)
+    return self.db_filehandle.write(data)
 
   # Test if we have correct begin tag for version 3 db
   def db_test_bg_tag (self, tag):
@@ -92,30 +92,33 @@ class VaultVer4(object):
 
   # Read header from file to Vault
   def db_read_header(self, password, vault):
-    vault.f_tag = self.__filehandle.read(4)  # TAG: magic tag
+    vault.f_tag = self.db_filehandle.read(4)  # TAG: magic tag
 
     if vault.f_tag != self.db_version_tag:
       raise DBError("Wrong database version string giving up.")
 
     # Add all user passwords/auth_tags from vault db to list
     while True:
-      auth_tag = self.__filehandle.read(4)
+      auth_tag = self.db_filehandle.read(4)
       if auth_tag == self.db_dbtag:
         break
-      self.db_v4_passwds.append({'auth': auth_tag, 'passwd': self.__filehandle.read(32), 'orig': '1'})
+      self.db_v4_passwds.append({'auth': auth_tag, 'passwd': self.db_filehandle.read(32), 'orig': '1'})
 
-    vault.f_salt = self.__filehandle.read(32)  # SALT: SHA-256 salt
-    vault.f_iter = struct.unpack("<L", self.__filehandle.read(4))[0]  # ITER: SHA-256 keystretch iterations
-    vault.f_sha_ps = self.__filehandle.read(32) # H(P'): SHA-256 hash of stretched passphrase
-    vault.f_b1 = self.__filehandle.read(16)  # B1
-    vault.f_b2 = self.__filehandle.read(16)  # B2
-    vault.f_b3 = self.__filehandle.read(16)  # B3
-    vault.f_b4 = self.__filehandle.read(16)  # B4
-    vault.f_iv = self.__filehandle.read(16)  # IV: initialization vector of Twofish CBC
+    vault.f_salt = self.db_filehandle.read(32)  # SALT: SHA-256 salt
+    vault.f_iter = struct.unpack("<L", self.db_filehandle.read(4))[0]  # ITER: SHA-256 keystretch iterations
+    vault.f_sha_ps = self.db_filehandle.read(32) # H(P'): SHA-256 hash of stretched passphrase
+    vault.f_b1 = self.db_filehandle.read(16)  # B1
+    vault.f_b2 = self.db_filehandle.read(16)  # B2
+    vault.f_b3 = self.db_filehandle.read(16)  # B3
+    vault.f_b4 = self.db_filehandle.read(16)  # B4
+    vault.f_iv = self.db_filehandle.read(16)  # IV: initialization vector of Twofish CBC
 
   # Create empty Vault for v3 db
   # password argument is secondary password from user
   def db_create_header(self, password, vault):
+
+    assert isinstance(password, bytes)
+
     vault.f_tag = self.db_version_tag
     vault.f_salt = vault.urandom(32)
     vault.f_iter = 2048
@@ -125,7 +128,7 @@ class VaultVer4(object):
     # XXX What about master normal password ?
     rand_p = random_password()
     rand_p.password_length = 32
-    master_passwd = rand_p.generate_password()
+    master_passwd = bytes(rand_p.generate_password(), 'UTF-8')
 
     stretched_master_password = vault._stretch_password(master_passwd, vault.f_salt, vault.f_iter)
     vault.f_sha_ps = hashlib.sha256(stretched_master_password).digest()
@@ -140,7 +143,7 @@ class VaultVer4(object):
 
     vault.f_iv = vault.urandom(16)
 
-    hmac_checker = HMAC(key_l, "", hashlib.sha256)
+    hmac_checker = HMAC(key_l, b"", hashlib.sha256)
 
     # No records yet
     vault.f_hmac = hmac_checker.digest()
@@ -152,26 +155,27 @@ class VaultVer4(object):
 
   def db_write_header(self, vault, password):
     # FIXME: choose new SALT, B1-B4, IV values on each file write? Conflicting Specs!
+    assert isinstance(password, bytes)
 
     # write boilerplate
-    self.__filehandle.write(vault.f_tag)
+    self.db_filehandle.write(vault.f_tag)
 
     for item in self.db_v4_passwds:
-       self.__filehandle.write(item['auth'])
-       self.__filehandle.write(item['passwd'])
+       self.db_filehandle.write(item['auth'])
+       self.db_filehandle.write(item['passwd'])
 
-    self.__filehandle.write(self.db_dbtag)
-    self.__filehandle.write(vault.f_salt)
-    self.__filehandle.write(struct.pack("<L", vault.f_iter))
+    self.db_filehandle.write(self.db_dbtag)
+    self.db_filehandle.write(vault.f_salt)
+    self.db_filehandle.write(struct.pack("<L", vault.f_iter))
 
-    self.__filehandle.write(vault.f_sha_ps)
+    self.db_filehandle.write(vault.f_sha_ps)
 
-    self.__filehandle.write(vault.f_b1)
-    self.__filehandle.write(vault.f_b2)
-    self.__filehandle.write(vault.f_b3)
-    self.__filehandle.write(vault.f_b4)
+    self.db_filehandle.write(vault.f_b1)
+    self.db_filehandle.write(vault.f_b2)
+    self.db_filehandle.write(vault.f_b3)
+    self.db_filehandle.write(vault.f_b4)
 
-    self.__filehandle.write(vault.f_iv)
+    self.db_filehandle.write(vault.f_iv)
 
   #
   # Go through all loaded passwords from file and try to find working one.
