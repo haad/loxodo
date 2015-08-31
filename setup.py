@@ -14,7 +14,7 @@ extra_options = dict(
     app = ['loxodo.py', 'web-loxodo.py'],
     scripts = ['loxodo.py', 'web-loxodo.py'],
     packages = ['Loxodo', 'Loxodo/db', 'Loxodo/twofish', 'Loxodo/frontends', 'Loxodo/frontends/cmdline', 'Loxodo/frontends/web'],
-    install_requires=['flask', 'jinja2', 'flask-mail']
+    install_requires=['flask', 'jinja2', 'flask-mail', 'flask-api']
 )
 setup(**extra_options)
 
